@@ -1,6 +1,6 @@
 Flask
 Gunicorn
-BeautifulSoup
+BeautifulSoup4
 random
 requests
 request
