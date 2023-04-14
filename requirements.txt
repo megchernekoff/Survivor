@@ -3,4 +3,3 @@ Gunicorn
 BeautifulSoup4
 requests
 pandas
-re
