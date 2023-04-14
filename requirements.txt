@@ -1,3 +1,7 @@
 Flask
 Gunicorn
 BeautifulSoup4
+requests
+StringIO
+pandas
+re
