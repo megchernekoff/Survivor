@@ -1,0 +1,28 @@
+
+<html>
+	<head>
+		<title>Survivor Season</title>
+	</head>
+	<body>
+		<table border="1" class="dataframe">
+      <caption> {{season_name}}</caption>
+			<thead>
+        <td scope='col' colspan="3" style='word-wrap: break-all;'>{{season_prem}}</td>
+				<tr style="text-align: left;">
+					<th>Contestant</th>
+					<th>Age</th>
+					<th>From</th>
+				</tr>
+			</thead>
+          {% for cont in contestants %}
+            {% set item_1 = contestants[loop.index-1] %}
+            {% set item_2 = ages[loop.index-1] %}
+            {% set item_3 = froms[loop.index-1] %}
+            <tr>
+              <td> {{item_1}} </td>
+              <td> {{item_2}} </td>
+              <td> {{item_3}} </td>
+            </tr>
+    {% endfor %}
+  </body>
+</html>

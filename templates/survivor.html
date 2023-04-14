@@ -1,0 +1,29 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Surivor Shuffle</title>
+  <link rel="stylesheet" href="https://unpkg.com/mvp.css@1.12/mvp.css">
+  </head>
+  <body>
+    <form action="http://127.0.0.1:5000/result" method='POST'>
+      <label for='season'>Select Season Number</label>
+      <br>
+      <select id='season' name='season'>
+        {% for n in range %}
+          <option>{{n + 1}}</option>
+        {% endfor %}
+      </select>
+      <!--<input type='test' id='season' name='season' placeholder='enter season here'></input>-->
+      <br>
+      <br>
+      <label for='shuffle'>Do you want to shuffle the elimination order?</label>
+      <br>
+      <input type = 'radio' name='radioname' id='radioselectYes' value='Yes'>Yes</input>
+      <br>
+      <input type='radio' name='radioname' id='radioselectNo' value='No'>No</input>
+      <br>
+      <br>
+      <button type='submit'>Submit Form</button>
+    </form>
+  </body>
+</html>
