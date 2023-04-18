@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template
 import requests
 import random
+import sqlite3
 import re
 import pandas as pd
 from bs4 import BeautifulSoup as bs
