@@ -2,6 +2,7 @@ from flask import Flask, request, render_template
 from Survivor_Shuffle import main_function
 import requests
 import random
+import sqlite3
 import re
 import pandas as pd
 from bs4 import BeautifulSoup as bs
@@ -26,14 +27,22 @@ def get_inputs():
         print('num')
         print(num)
         shuffle = request.form.get("radioname")
-        sn, sp, conts, ags, fs = main_function(num, shuffle)
+        conn = conn = sqlite3.connect('db.sqlite3')
+        cursor = conn.execute("""Select * from survivor where Season = {}""".format(num))
+        results = pd.DataFrame(cursor.fetchall(), columns=['Contestant', 'Age', 'From', 'Season', 'Season Name', 'Season Premise'])
+        snum, sname, snprem = results.iloc[0][['Season', 'Season Name', 'Season Premise']].tolist()
+        conts, ags, fs = results['Contestant'].tolist(), results['Age'].tolist(), results['From'].tolist()
+        if shuffle == 'Yes':
+            random.shuffle(conts)
+        # print(pd.DataFrame(results, columns=['Contestant', 'Age', 'From', 'Season', 'Season Name', 'Season Premise']))
+        # sn, sp, conts, ags, fs = main_function(num, shuffle)
         # print('TABLE')
         # table_html = bs(re.sub(re.compile('\n'), '', str(df.to_html())))
         # html_index = str(table_html).index('<html>') + len('<html>')
         # table_html = bs(str(table_html)[:html_index] + '<head><title>Survivor Season</title></head>' + str(table_html)[html_index:])
         # print(table_html)
         print('returning html')
-        return render_template('result.html', template_folder='templates', season_name=sn, season_prem=sp, contestants=conts, ages = ags, froms = fs)
+        return render_template('result.html', template_folder='templates', season_name=sname, season_prem=snprem, contestants=conts, ages = ags, froms = fs)
 
 
 

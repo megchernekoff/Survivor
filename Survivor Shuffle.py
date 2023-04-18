@@ -4,12 +4,33 @@ import re
 import pandas as pd
 from bs4 import BeautifulSoup as bs
 from io import StringIO
+import sqlite3
 import warnings
+import numpy as np
 warnings.filterwarnings("ignore")
 
 
 FILEPATH = "https://en.wikipedia.org/wiki/Survivor_(American_TV_series)"
 
+def create_connection(db):
+    conn = None
+    try:
+        print('here')
+        conn = sqlite3.connect(db)
+        return conn
+    except Error as e:
+        print(e)
+
+    return conn
+
+def create_table(conn):
+    c = conn.cursor()
+    c.execute("""CREATE TABLE IF NOT EXISTS survivor (
+        Contestant text,
+        Age integer,
+        Hometown text,
+        Season integer
+    );""")
 
 def get_html():
     web = requests.get(FILEPATH)
@@ -52,19 +73,27 @@ def get_clean_df(tab):
 
     df.fillna(0, inplace=True)
     df = df.loc[df['Contestant'] != 0]
-
-    df_keep = df[['Contestant', 'Age', 'From']]
+    df.rename(columns={'From':'Hometown'} ,inplace=True)
+    df_keep = df[['Contestant', 'Age', 'Hometown']]
     df_keep = df_keep.sample(frac = 1).reset_index(drop=True)
     df_keep['Age'] = df_keep['Age'].apply(lambda x: int(x))
-    return df_keep.to_dict('records')
+    df_keep['Season'] = NUM
+    # df_keep['index'] = np.arange(1, len(df)+ 1)
+    print(df_keep)
+    return df_keep
+    # return df_keep.to_dict('records')
 
 
 if __name__ == '__main__':
-    NUM = input('Enter the Survivor season number: ')
-    print(NUM)
-    html, season_name, season_loc, season_prem = get_html()
-    cont_table = get_contestant_table(html)
-    new_html = remove_italics(cont_table)
-    new_cont_table = get_contestant_table(new_html)
-    df_keep = get_clean_df(new_cont_table)
-    print(df_keep)
+    conn = create_connection('db.sqlite3')
+    # create_table(conn)
+    # create_table(conn)
+    # NUM = input('Enter the Survivor season number: ')
+    for NUM in range(1, 43):
+        print(NUM)
+        html, season_name, season_loc, season_prem = get_html()
+        cont_table = get_contestant_table(html)
+        new_html = remove_italics(cont_table)
+        new_cont_table = get_contestant_table(new_html)
+        df_keep = get_clean_df(new_cont_table)
+        df_keep.to_sql('survivor', conn, index=False, if_exists='append')

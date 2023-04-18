@@ -4,11 +4,34 @@ import re
 import pandas as pd
 from bs4 import BeautifulSoup as bs
 from io import StringIO
+import sqlite3
+import numpy as np
 import warnings
 warnings.filterwarnings("ignore")
 
 FILEPATH = "https://en.wikipedia.org/wiki/Survivor_(American_TV_series)"
 
+def create_connection(db):
+    conn = None
+    try:
+        print('here')
+        conn = sqlite3.connect(db)
+        return conn
+    except Error as e:
+        print(e)
+
+    return conn
+
+def create_table(conn):
+    c = conn.cursor()
+    c.execute("""CREATE TABLE IF NOT EXISTS survivor (
+        Contestant text,
+        Age integer,
+        Hometown text,
+        Season integer,
+        SeasonName text,
+        SeasonPremise text
+    );""")
 
 def get_html(num):
     web = requests.get(FILEPATH)
@@ -52,7 +75,7 @@ def remove_italics(cont_table, season_prem, season_loc):
     new_html= bs(str(cont_table_new).replace(str(cont_table_body), str(new_cont_table_body)))
     return new_html
 
-def get_clean_df(tab, shuffle = 'yes'):
+def get_clean_df(tab, snum, sname, snprem):
     print('getting df')
     df = pd.read_html(StringIO(str(tab)))[0]
     print('changing column list')
@@ -62,18 +85,22 @@ def get_clean_df(tab, shuffle = 'yes'):
     df.fillna(0, inplace=True)
     print('restructuring df')
     df = df.loc[df['Contestant'] != 0]
-    df_keep = df[['Contestant', 'Age', 'From']]
-    print('checking shuffler')
-    if shuffle.lower() == 'yes':
-        print('shuffling df')
-        df_keep = df_keep.sample(frac = 1).reset_index(drop=True)
+    df.rename(columns={'From':"Hometown"}, inplace=True)
+    df_keep = df[['Contestant', 'Age', 'Hometown']]
+    df_keep['Season'] = snum
+    df_keep['SeasonName'] = sname
+    df_keep['SeasonPremise'] = snprem
+    # print('checking shuffler')
+    # if shuffle.lower() == 'yes':
+    #     print('shuffling df')
+    #     df_keep = df_keep.sample(frac = 1).reset_index(drop=True)
     # print('fixing age')
     # df_keep['Age'] = df_keep['Age'].apply(lambda x: int(x))
     print('returning df keep')
-    print(df_keep)
+    # print(df_keep)
     return df_keep
 
-def main_function(num, shuffle):
+def main_function(num):
     print('getting html')
     html, season_name, season_loc, season_prem = get_html(num)
     print('getting first contestant table')
@@ -83,14 +110,21 @@ def main_function(num, shuffle):
     print('getting new contestant table')
     new_cont_table = get_contestant_table(new_html)
     print('returning df')
-    df_keep = get_clean_df(new_cont_table, shuffle)
-    print('python script done')
-    df_dict = df_keep.to_dict()
-    list(df_dict['Contestant'].values())
-    return season_name, season_prem, list(df_dict['Contestant'].values()), list(df_dict['Age'].values()), list(df_dict['From'].values())
+    df_keep = get_clean_df(new_cont_table, num, season_name, season_prem)
+    return df_keep
+    #print('python script done')
+    #df_dict = df_keep.to_dict()
+    #list(df_dict['Contestant'].values())
+    # return season_name, season_prem, list(df_dict['Contestant'].values()), list(df_dict['Age'].values()), list(df_dict['From'].values())
 
 if __name__ == '__main__':
-        main_function(16, shuffle='No')
+        conn = create_connection('db.sqlite3')
+        create_table(conn)
+
+        for NUM in range(1, 43):
+            df_keep = main_function(NUM)
+            df_keep.to_sql('survivor', conn, index=False, if_exists='append')
+        conn.close()
 
 
 # if __name__ == '__main__':
