@@ -1,12 +1,10 @@
 from flask import Flask, request, render_template
-from Survivor_Shuffle import main_function
 import requests
 import random
-import sqlite3
 import re
 import pandas as pd
 from bs4 import BeautifulSoup as bs
-from io import StringIO
+
 
 FILEPATH = "https://en.wikipedia.org/wiki/Survivor_(American_TV_series)"
 
