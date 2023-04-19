@@ -25,7 +25,7 @@ def get_inputs():
         cursor = conn.execute("""Select * from survivor where Season = {}""".format(num))
         results = pd.DataFrame(cursor.fetchall(), columns=['Contestant', 'Age', 'From', 'Season', 'Season Name', 'Season Premise'])
         snum, sname, snprem = results.iloc[0][['Season', 'Season Name', 'Season Premise']].tolist()
-        caf_list = list(zip(df['Contestant'], df['Age'], df['From']))
+        caf_list = list(zip(results['Contestant'], results['Age'], results['From']))
         # conts, ags, fs = results['Contestant'].tolist(), results['Age'].tolist(), results['From'].tolist()
         if shuffle == 'Yes':
             random.shuffle(caf_list)
